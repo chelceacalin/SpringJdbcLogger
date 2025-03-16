@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=master;encrypt=false
+    username: sa
+    password: YourStrong!Passw0rd
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
