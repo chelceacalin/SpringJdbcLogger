@@ -1,7 +1,7 @@
 package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.impl;
 
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.CommonUtil;
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger.SimpleJdbcCallLoggerFactory;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger.SimpleJdbcCallLogger;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.mapper.ProcedureParameterMapper;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.model.ProcedureParameter;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.ProcedureParameterRepository;
@@ -18,12 +18,11 @@ import java.util.List;
 public class ProcedureParameterRepositoryImpl implements ProcedureParameterRepository {
 
     final JdbcTemplate jdbcTemplate;
-    final SimpleJdbcCallLoggerFactory factory;
     final ProcedureParameterMapper procedureParameterMapper;
 
     @Override
     public List<ProcedureParameter> findAll() {
-        SimpleJdbcCall simpleJdbcCall = factory.createJdbcLogger(jdbcTemplate)
+        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCallLogger(jdbcTemplate)
                 .withProcedureName(CommonUtil.GET_PROCEDURE_PARAMETERS)
                 .withoutProcedureColumnMetaDataAccess()
                 .returningResultSet("results", procedureParameterMapper);

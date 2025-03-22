@@ -21,3 +21,6 @@ spring:
     type: redis
   main:
     register-shutdown-hook: true
+
+logging.level.org.springframework.data.convert.CustomConversions: ERROR
+logging.level.org.springframework.validation.beanvalidation: ERROR

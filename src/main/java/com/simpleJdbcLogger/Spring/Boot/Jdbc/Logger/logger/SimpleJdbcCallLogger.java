@@ -3,6 +3,7 @@ package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataColumn;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.model.ProcedureParameter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -13,23 +14,27 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class SimpleJdbcCallLogger extends SimpleJdbcCall {
 
     int maxRowsToPrint;
-    boolean runWithEnhancedLogger;
+    boolean runWithEnhancedLogger = true;
+    Map<String, List<ProcedureParameter>> procedureParameterMap;
 
     public SimpleJdbcCallLogger(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
     }
 
 
-    public SimpleJdbcCallLogger(JdbcTemplate jdbcTemplate, int maxRowsToPrint, boolean runWithEnhancedLogger) {
+    public SimpleJdbcCallLogger(JdbcTemplate jdbcTemplate, int maxRowsToPrint, boolean runWithEnhancedLogger, Map<String, List<ProcedureParameter>> procedureParameterMap) {
         super(jdbcTemplate);
         this.maxRowsToPrint = maxRowsToPrint;
         this.runWithEnhancedLogger = runWithEnhancedLogger;
+        this.procedureParameterMap = procedureParameterMap;
     }
 
     @Override
@@ -37,7 +42,6 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
         if (!runWithEnhancedLogger) {
             return super.execute(parameterSource);
         }
-
         long startTime = System.currentTimeMillis();
         boolean success = false;
         Map<String, Object> result;
@@ -51,18 +55,16 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
             throw e;
         } finally {
             long endTime = System.currentTimeMillis();
-            String dbCall = "";
+            String dbCall;
             try {
                 dbCall = getDbCall(parameterSource);
             } catch (Exception ex) {
-                dbCall = "-- failed to build dbCall: " + ex.getMessage();
+                dbCall = "Failed to build db call: " + ex.getMessage();
             }
             if (success) {
-
                 log.info("Success: {}, Duration: {}ms, Call: {}", success, endTime - startTime, dbCall);
             } else {
                 log.error("Success: {}, Duration: {}ms, Call: {}", success, endTime - startTime, dbCall);
-
             }
         }
     }
@@ -72,10 +74,9 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
         if (parameterSource == null || parameterSource.getParameterNames() == null) {
             return "Error generating query, param source is null";
         }
-        StringBuilder log = new StringBuilder("EXEC ").append(super.getProcedureName());
-        if (parameterSource.getParameterNames().length > 0) {
-            log.append(" ");
-        }
+
+        StringBuilder log = new StringBuilder("EXEC ")
+                .append(super.getProcedureName());
 
         var parameterNames = parameterSource.getParameterNames();
         for (String parameterName : parameterNames) {
@@ -83,54 +84,9 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
             StringBuilder declareLog = new StringBuilder();
             String sqlParamName = "@" + parameterName;
             if (paramValue instanceof SQLServerDataTable dt) {
-                declareLog = new StringBuilder("DECLARE ");
-                declareLog.append(sqlParamName);
-                declareLog.append(" TABLE(");
-                for (int i = 0; i < dt.getColumnMetadata().size(); i++) {
-                    SQLServerDataColumn column = dt.getColumnMetadata().get(i);
-                    declareLog.append(column.getColumnName()).append(" ").append(getSqlType(column.getColumnType()));
-
-                    if (i < dt.getColumnMetadata().size() - 1) {
-                        declareLog.append(", ");
-                    }
-                }
-                declareLog.append("); \n");
-                declareLog.append("INSERT INTO ").append(sqlParamName);
-                declareLog.append(" VALUES");
-                var iterator = dt.getIterator();
-                int currentRow = 0;
-                while (iterator.hasNext()) {
-                    if (currentRow == maxRowsToPrint) {
-                        break;
-                    }
-                    var column = iterator.next();
-                    var values = column.getValue();
-                    declareLog.append("(");
-                    for (int i = 0; i < values.length; i++) {
-                        declareLog.append(formatValue(values[i]));
-
-                        if (i < values.length - 1) {
-                            declareLog.append(", ");
-                        }
-                    }
-                    declareLog.append("),");
-                    currentRow++;
-                }
-                if (declareLog.charAt(declareLog.length() - 1) == ',') {
-                    declareLog.deleteCharAt(declareLog.length() - 1);
-                }
-                declareLog.append(";\n");
-
-
-                log.insert(0, declareLog);
-                log.append(" ").append("@").append(parameterName).append("=").append("@").append(parameterName).append(", ");
+                processDataTable(parameterName, dt, sqlParamName, log);
             } else {
-                declareLog.append(" ").append(sqlParamName);
-
-                Object value = parameterSource.getValue(parameterName);
-                declareLog.append("=").append(formatValue(value));
-
-                log.append(declareLog).append(",");
+                processNonDataTable(parameterSource, parameterName, declareLog, sqlParamName, log);
             }
         }
 
@@ -140,6 +96,99 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
         }
         logString += ";";
         return logString;
+    }
+
+    private void processDataTable(String parameterName, SQLServerDataTable dt, String sqlParamName, StringBuilder log) {
+        StringBuilder declareLog;
+        declareLog = declareSqlServerDataTable(dt, sqlParamName);
+        insertValuesInSqlServerDataTable(dt, declareLog, sqlParamName);
+
+        log.insert(0, declareLog); // put at beginning the table declaration
+        log.append(" ").append("@").append(parameterName).append(" = ").append("@").append(parameterName).append(",");
+    }
+
+    private static void processNonDataTable(SqlParameterSource parameterSource, String parameterName, StringBuilder declareLog, String sqlParamName, StringBuilder log) {
+        Object value = parameterSource.getValue(parameterName);
+        declareLog
+                .append(" ")
+                .append(sqlParamName).append(" = ")
+                .append(formatValue(value));
+        log
+                .append(declareLog)
+                .append(",");
+    }
+
+    private void insertValuesInSqlServerDataTable(SQLServerDataTable dt, StringBuilder declareLog, String sqlParamName) {
+        declareLog
+                .append("INSERT INTO ")
+                .append(sqlParamName)
+                .append(" VALUES");
+
+        var iterator = dt.getIterator();
+        int currentRow = 0;
+        while (iterator.hasNext()) {
+            if (currentRow == maxRowsToPrint) {
+                break;
+            }
+            var column = iterator.next();
+            var values = column.getValue();
+            declareLog.append("(");
+            for (int i = 0; i < values.length; i++) {
+                declareLog.append(formatValue(values[i]));
+
+                if (i < values.length - 1) {
+                    declareLog.append(", ");
+                }
+            }
+            declareLog.append("),");
+            currentRow++;
+        }
+        if (declareLog.charAt(declareLog.length() - 1) == ',') {
+            declareLog.deleteCharAt(declareLog.length() - 1);
+        }
+        declareLog.append(";\n");
+    }
+
+    private StringBuilder declareSqlServerDataTable(SQLServerDataTable dt, String sqlParamName) {
+        StringBuilder declareLog;
+        declareLog = new StringBuilder("DECLARE ");
+        declareLog.append(sqlParamName);
+
+        AtomicBoolean foundParam = new AtomicBoolean(false);
+        if (super.getProcedureName() != null) {
+            String procedureName = removeBrackets(super.getProcedureName());
+            List<ProcedureParameter> procedureParameters = procedureParameterMap.get(procedureName);
+            if (procedureParameters != null) {
+                procedureParameters.stream()
+                        .filter(p -> p.getParameterName().equals(sqlParamName.substring(1)) || p.getParameterName().equals(sqlParamName))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            declareLog
+                                    .append(" as ")
+                                    .append(p.getParameterType())
+                                    .append(";");
+                            foundParam.set(true);
+                        });
+            }
+        }
+        if (!foundParam.get()) {
+            declareLog.append(" TABLE(");
+            for (int i = 0; i < dt.getColumnMetadata().size(); i++) {
+                SQLServerDataColumn column = dt.getColumnMetadata().get(i);
+                declareLog
+                        .append(column.getColumnName())
+                        .append(" ")
+                        .append(getSqlType(column.getColumnType()));
+
+                if (i < dt.getColumnMetadata().size() - 1) {
+                    declareLog.append(", ");
+                }
+            }
+            declareLog.append("); ");
+        }
+        declareLog.append("\n");
+
+        return declareLog;
     }
 
     private String getSqlType(int sqlType) {
@@ -161,7 +210,10 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
         } else if (paramValue instanceof LocalDateTime) {
             return "'" + ((LocalDateTime) paramValue).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "'";
         }
-
         return paramValue.toString();
+    }
+
+    public String removeBrackets(String sql) {
+        return sql.substring(1, sql.length() - 1);
     }
 }
