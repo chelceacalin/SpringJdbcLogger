@@ -147,3 +147,22 @@ GO
 
 
 
+--CREATE PROCEDURE PARAMS
+CREATE PROCEDURE GetProcedureParameters
+    AS
+BEGIN
+SELECT
+    o.name AS ProcedureName,
+    p.name AS ParameterName,
+    t.name AS ParameterType
+FROM
+    sys.procedures o
+        JOIN
+    sys.parameters p ON o.object_id = p.object_id
+        JOIN
+    sys.types t ON p.user_type_id = t.user_type_id
+ORDER BY
+    o.name, p.parameter_id;
+END;
+
+
