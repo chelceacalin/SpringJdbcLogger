@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/employee")
 @RequiredArgsConstructor
@@ -17,6 +19,12 @@ public class EmployeeController {
     public ResponseEntity<Object> addEmployee(@RequestBody EmployeeAdd employeeAdd) {
         return ResponseEntity.ok(employeeService.addEmployee(employeeAdd));
     }
+
+    @PostMapping("/multiple")
+    public ResponseEntity<Object> addEmployees(@RequestBody List<EmployeeAdd> employeeAdds) {
+        return ResponseEntity.ok(employeeService.addEmployees(employeeAdds));
+    }
+
 
     @GetMapping
     public ResponseEntity<Object> getEmployees() {

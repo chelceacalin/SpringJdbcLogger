@@ -8,8 +8,7 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 public class SpringBootJdbcLoggerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SpringBootJdbcLoggerApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBootJdbcLoggerApplication.class, args);
+    }
 }

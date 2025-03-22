@@ -33,7 +33,7 @@ public class SettingServiceImpl implements SettingService {
             value = settingsRepository.getSettingByKey(key);
             cache.put(key, value);
         } else {
-            log.info("[SettingServiceImpl] Setting with key [{}] already exists", key);
+            //  log.info("[SettingServiceImpl] Setting with key [{}] already exists", key);
         }
         return value;
 

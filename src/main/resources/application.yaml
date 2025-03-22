@@ -19,6 +19,5 @@ spring:
       password: my-password
   cache:
     type: redis
-logging:
-  level:
-    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+  main:
+    register-shutdown-hook: true

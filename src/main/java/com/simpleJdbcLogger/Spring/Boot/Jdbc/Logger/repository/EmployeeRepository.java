@@ -12,4 +12,6 @@ public interface EmployeeRepository {
     EmployeeAdded addEmployee(EmployeeAdd employeeAdd);
 
     List<EmployeeAdded> findAll();
+
+    List<EmployeeAdded> addEmployees(List<EmployeeAdd> employeeAdds);
 }

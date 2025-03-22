@@ -3,7 +3,7 @@ package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.impl;
 import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.employee.EmployeeAdd;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.employee.EmployeeAdded;
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger.SimpleJdbcCallLogger;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger.SimpleJdbcCallLoggerFactory;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.mapper.EmployeeAddedMapper;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,7 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.CommonUtil.GET_ALL_EMPLOYEES;
-import static com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.CommonUtil.INSERT_EMPLOYEES;
+import static com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.CommonUtil.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     final JdbcTemplate jdbcTemplate;
     final EmployeeAddedMapper employeeAddedMapper;
+    final SimpleJdbcCallLoggerFactory factory;
 
     @Override
     public EmployeeAdded addEmployee(EmployeeAdd employeeAdd) {
@@ -44,7 +44,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
         }
 
 
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCallLogger(jdbcTemplate)
+        SimpleJdbcCall simpleJdbcCall = factory.createJdbcLogger(jdbcTemplate)
                 .withProcedureName(INSERT_EMPLOYEES)
                 .declareParameters(
                         new SqlParameter("Employees", microsoft.sql.Types.STRUCTURED),
@@ -64,13 +64,47 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
 
     @Override
     public List<EmployeeAdded> findAll() {
-        SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCallLogger(jdbcTemplate)
+        SimpleJdbcCall simpleJdbcCall = factory.createJdbcLogger(jdbcTemplate)
                 .withProcedureName(GET_ALL_EMPLOYEES)
                 .withoutProcedureColumnMetaDataAccess()
                 .returningResultSet("results", employeeAddedMapper);
 
         MapSqlParameterSource in = new MapSqlParameterSource();
         var output = simpleJdbcCall.execute(in);
+        return (List<EmployeeAdded>) output.get("results");
+    }
+
+    @Override
+    public List<EmployeeAdded> addEmployees(List<EmployeeAdd> employeeAdds) {
+
+        SQLServerDataTable sqlServerDataTable = null;
+        try {
+            sqlServerDataTable = new SQLServerDataTable();
+            sqlServerDataTable.addColumnMetadata("EmployeeName", Types.VARCHAR);
+            sqlServerDataTable.addColumnMetadata("DepartmentId", Types.INTEGER);
+            sqlServerDataTable.addColumnMetadata("HireDate", Types.DATE);
+            for (var emp : employeeAdds) {
+                sqlServerDataTable.addRow(emp.getName(), emp.getDepartmentId(), emp.getHireDate());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+
+        SimpleJdbcCall simpleJdbcCall = factory.createJdbcLogger(jdbcTemplate)
+                .withProcedureName(INSERT_EMPLOYEES_MULTIPLE)
+                .declareParameters(
+                        new SqlParameter("Employees", microsoft.sql.Types.STRUCTURED),
+                        new SqlParameter("DefaultHireDate", Types.DATE)
+                )
+                .withoutProcedureColumnMetaDataAccess()
+                .returningResultSet("results", employeeAddedMapper);
+
+        MapSqlParameterSource in = new MapSqlParameterSource()
+                .addValue("Employees", sqlServerDataTable)
+                .addValue("DefaultHireDate", LocalDate.now());
+        var output = simpleJdbcCall.execute(in);
+
         return (List<EmployeeAdded>) output.get("results");
     }
 }

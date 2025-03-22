@@ -113,4 +113,37 @@ END
 GO
 
 
+-- INSERT MULTIPLE EMPLOYEES
+CREATE PROCEDURE InsertEmployeesMultiple
+    @Employees EmployeeTableType READONLY,
+    @DefaultHireDate DATE = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Inserted TABLE (
+        EmployeeId INT,
+        EmployeeName NVARCHAR(100),
+        DepartmentId INT,
+        HireDate DATE
+    );
+
+INSERT INTO Employee (EmployeeName, DepartmentId, HireDate)
+    OUTPUT
+    INSERTED.EmployeeId,
+        INSERTED.EmployeeName,
+        INSERTED.DepartmentId,
+        INSERTED.HireDate
+    INTO @Inserted
+SELECT
+    e.EmployeeName,
+    e.DepartmentId,
+    ISNULL(e.HireDate, @DefaultHireDate)
+FROM @Employees e;
+
+SELECT * FROM @Inserted;
+END
+GO
+
+
 

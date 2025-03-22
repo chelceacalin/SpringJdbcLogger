@@ -10,4 +10,6 @@ public interface EmployeeService {
     EmployeeAdded addEmployee(EmployeeAdd employeeAdd);
 
     List<EmployeeAdded> findALl();
+
+    List<EmployeeAdded> addEmployees(List<EmployeeAdd> employeeAdds);
 }
