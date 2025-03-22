@@ -1,7 +1,7 @@
 package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.service.impl;
 
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.DepartmentAdd;
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.DepartmentAdded;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.department.DepartmentAdd;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.department.DepartmentAdded;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.DepartmentRepository;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.service.DepartmentService;
 import lombok.RequiredArgsConstructor;

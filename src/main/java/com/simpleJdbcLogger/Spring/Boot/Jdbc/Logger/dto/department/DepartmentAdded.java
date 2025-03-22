@@ -1,4 +1,4 @@
-package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto;
+package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.department;
 
 import lombok.Data;
 

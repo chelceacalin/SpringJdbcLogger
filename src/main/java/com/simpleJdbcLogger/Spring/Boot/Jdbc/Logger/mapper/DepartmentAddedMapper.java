@@ -1,7 +1,7 @@
 package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.mapper;
 
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.MapperUtil;
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.DepartmentAdded;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.department.DepartmentAdded;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 

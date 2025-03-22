@@ -1,6 +1,6 @@
 package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.controller;
 
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.DepartmentAdd;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.department.DepartmentAdd;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
