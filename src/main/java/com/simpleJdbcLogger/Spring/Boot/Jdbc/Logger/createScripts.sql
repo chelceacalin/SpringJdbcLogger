@@ -70,4 +70,20 @@ END
 go
 
 
+-- GET ALL EMPLOYEES
+CREATE PROCEDURE GetAllEmployees
+    AS
+BEGIN
+    SET NOCOUNT ON;
+
+SELECT
+    EmployeeId,
+    EmployeeName,
+    DepartmentId,
+    HireDate
+FROM Employee;
+END
+GO
+
+
 
