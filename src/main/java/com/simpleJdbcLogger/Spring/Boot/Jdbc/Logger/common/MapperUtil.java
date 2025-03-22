@@ -16,7 +16,7 @@ public class MapperUtil {
         try {
             return rs.getString(columnName);
         } catch (Exception e) {
-            return "";
+            return "Wrong column name";
         }
     }
 }

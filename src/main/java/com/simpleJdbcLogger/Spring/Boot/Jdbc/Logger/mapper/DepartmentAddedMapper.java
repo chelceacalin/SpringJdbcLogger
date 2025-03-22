@@ -12,8 +12,8 @@ public class DepartmentAddedMapper extends MapperUtil implements RowMapper<Depar
     @Override
     public DepartmentAdded mapRow(ResultSet rs, int rowNum) {
         DepartmentAdded added = new DepartmentAdded();
-        added.setId(getInt(rs, "id"));
-        added.setName(getString(rs, "name"));
+        added.setId(getInt(rs, "DepartmentId"));
+        added.setName(getString(rs, "DepartmentName"));
         return added;
     }
 }

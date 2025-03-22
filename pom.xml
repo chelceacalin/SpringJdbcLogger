@@ -38,9 +38,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<!-- For structured table -->
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
+			<version>11.2.3.jre17</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -53,6 +56,8 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+
 	</dependencies>
 
 	<build>

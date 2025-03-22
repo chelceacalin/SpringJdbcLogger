@@ -2,6 +2,7 @@ package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.impl;
 
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.DepartmentAdd;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.dto.DepartmentAdded;
+import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger.SimpleJdbcCallLogger;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.mapper.DepartmentAddedMapper;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
+import java.sql.SQLType;
 import java.sql.Types;
+import java.util.List;
 
 import static com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.CommonUtil.INSERT_DEPARTMENT;
 
@@ -36,6 +39,8 @@ public class DepartmentRepositoryImpl implements DepartmentRepository {
                 .addValue("DepartmentName", dto.getName());
 
         var output = simpleJdbcCall.execute(parameterSource);
-        return null;
+        var departments = (List<DepartmentAdded>) output.get("results");
+
+        return departments != null ? departments.get(0) : null;
     }
 }

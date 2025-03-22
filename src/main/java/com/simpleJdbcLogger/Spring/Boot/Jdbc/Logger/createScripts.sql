@@ -21,27 +21,53 @@ CREATE TYPE EmployeeTableType AS TABLE
     );
 
 -- INSERT EMPLOYEE
-CREATE PROCEDURE InsertEmployees @Employees EmployeeTableType READONLY,
-                                 @DefaultHireDate DATE = NULL
+CREATE PROCEDURE InsertEmployees
+    @Employees EmployeeTableType READONLY,
+    @DefaultHireDate DATE = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @Inserted TABLE (
+        EmployeeId INT,
+        EmployeeName NVARCHAR(100),
+        DepartmentId INT,
+        HireDate DATE
+    );
 
 INSERT INTO Employee (EmployeeName, DepartmentId, HireDate)
-SELECT e.EmployeeName,
-       e.DepartmentId,
-       ISNULL(e.HireDate, @DefaultHireDate)
+    OUTPUT INSERTED.EmployeeId, INSERTED.EmployeeName, INSERTED.DepartmentId, INSERTED.HireDate
+    INTO @Inserted
+SELECT
+    e.EmployeeName,
+    e.DepartmentId,
+    ISNULL(e.HireDate, @DefaultHireDate)
 FROM @Employees e;
+
+SELECT TOP 1 * FROM @Inserted;
 END
+GO
+
 
 --INSERT DEPARTMENT
-CREATE PROCEDURE InsertDepartment @DepartmentName NVARCHAR(100)
-    AS
+CREATE PROCEDURE InsertDepartment
+    @DepartmentName NVARCHAR(100)
+AS
 BEGIN
-        SET NOCOUNT ON;
+    SET NOCOUNT ON;
+
+    DECLARE @Inserted TABLE (
+                                DepartmentId INT,
+                                DepartmentName NVARCHAR(100)
+                            );
 
 INSERT INTO Department (DepartmentName)
+    OUTPUT INSERTED.DepartmentId, INSERTED.DepartmentName INTO @Inserted
 VALUES (@DepartmentName);
+
+SELECT * FROM @Inserted;
 END
+go
+
+
 
