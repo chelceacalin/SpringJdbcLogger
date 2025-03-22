@@ -9,15 +9,25 @@ import java.util.Map;
 
 public class SimpleJdbcCallLogger extends SimpleJdbcCall {
 
+    int maxRowsToPrint;
+    boolean runWithEnhancedLogger;
+
     public SimpleJdbcCallLogger(JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
+    }
+
+
+    public SimpleJdbcCallLogger(JdbcTemplate jdbcTemplate, int maxRowsToPrint, boolean runWithEnhancedLogger) {
+        super(jdbcTemplate);
+        this.maxRowsToPrint = maxRowsToPrint;
+        this.runWithEnhancedLogger = runWithEnhancedLogger;
     }
 
     @Override
     public Map<String, Object> execute(SqlParameterSource parameterSource) {
 
-
-        var a=parameterSource;
+        String sqlCall;
+        var a = parameterSource;
         return super.execute(parameterSource);
     }
 }
