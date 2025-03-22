@@ -86,4 +86,31 @@ END
 GO
 
 
+--CREATE TABLE SETTINGS
+CREATE TABLE Settings (
+                          Id INT IDENTITY(1,1) PRIMARY KEY,
+    [Key] NVARCHAR(100) NOT NULL UNIQUE,
+    [Value] NVARCHAR(MAX) NOT NULL,
+    [Description] NVARCHAR(255) NULL
+);
+
+
+-- GET SETTING BY KEY
+CREATE PROCEDURE GetSettingByKey
+    @Key NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+SELECT
+    Id,
+    [Key],
+    [Value],
+    [Description]
+FROM Settings
+WHERE [Key] = @Key;
+END
+GO
+
+
 

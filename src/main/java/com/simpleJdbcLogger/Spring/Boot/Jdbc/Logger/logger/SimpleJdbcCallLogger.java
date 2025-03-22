@@ -16,6 +16,7 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
     @Override
     public Map<String, Object> execute(SqlParameterSource parameterSource) {
 
+
         var a=parameterSource;
         return super.execute(parameterSource);
     }
