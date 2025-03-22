@@ -4,7 +4,8 @@
 
 #### **You will be able to directly execute this line in the terminal as if you ran it from SQL**
 
-##### If you want to run the project yourself, copy the [createScripts.sql](src/main/java/com/simpleJdbcLogger/Spring/Boot/Jdbc/Logger/createScripts.sql) contents and run it in terminal
+##### If you want to run the project yourself, run docker compose up, then connect to the db and
+copy the [createScripts.sql](src/main/java/com/simpleJdbcLogger/Spring/Boot/Jdbc/Logger/createScripts.sql) contents and run it in terminal
 
 **Example:**
 
