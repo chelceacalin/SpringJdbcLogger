@@ -4,8 +4,7 @@
 
 #### **You will be able to directly execute this line in the terminal as if you ran it from SQL**
 
-##### If you want to run the project yourself, run docker compose up, then connect to the db and
-copy the [createScripts.sql](src/main/java/com/simpleJdbcLogger/Spring/Boot/Jdbc/Logger/createScripts.sql) contents and run it in terminal
+##### If you want to run the project yourself, run docker compose up, then connect to the db with the credentials from [application.yaml](src/main/resources/application.yaml) and copy the [createScripts.sql](src/main/java/com/simpleJdbcLogger/Spring/Boot/Jdbc/Logger/createScripts.sql) contents and run it in terminal
 
 **Example:**
 
@@ -38,3 +37,5 @@ EXEC [GetAllEmployees];
 * 2 ways to initialize: Either by using new SimpleJdbcCallLogger - will not benefit from parameter translation, or with
   SimpleJdbcCallLoggerFactory - will benefit from customization regarding number of rows to print and parameter
   translation
+
+**_Feel free to fork/copy the project and develop it further :)_**
