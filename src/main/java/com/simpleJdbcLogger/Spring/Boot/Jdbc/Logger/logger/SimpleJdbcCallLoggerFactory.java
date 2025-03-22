@@ -1,6 +1,5 @@
 package com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.logger;
 
-import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.common.CommonUtil;
 import com.simpleJdbcLogger.Spring.Boot.Jdbc.Logger.service.SettingService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +20,10 @@ public class SimpleJdbcCallLoggerFactory {
     @PostConstruct
     public void init() {
         Optional.ofNullable(settingService.getSettingByKey(CUSTOM_JDBC_LOGGER_ENABLED)).ifPresent(setting ->
-        {
-            runWithEnhancedLogger = Boolean.parseBoolean(setting.getValue());
-        });
+                runWithEnhancedLogger = Boolean.parseBoolean(setting.getValue()));
 
         Optional.ofNullable(settingService.getSettingByKey(MAX_ROWS_TO_PRINT)).ifPresent(setting ->
-        {
-            maxRowsToPrint = Integer.parseInt(setting.getValue());
-        });
+                maxRowsToPrint = Integer.parseInt(setting.getValue()));
     }
 
     public SimpleJdbcCallLogger createJdbcLogger(JdbcTemplate jdbcTemplate) {
