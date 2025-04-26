@@ -203,12 +203,12 @@ public class SimpleJdbcCallLogger extends SimpleJdbcCall {
     private static String formatValue(Object paramValue) {
         if (paramValue == null) {
             return "NULL";
-        } else if (paramValue instanceof LocalDate || paramValue instanceof String || paramValue instanceof LocalTime) {
+        } else if (paramValue instanceof LocalDateTime) {
+            return "'" + paramValue + ":00'";
+        } else if (paramValue instanceof LocalDate || paramValue instanceof String) {
             return "'" + paramValue + "'";
         } else if (paramValue instanceof Boolean) {
             return (Boolean) paramValue ? "1" : "0";
-        } else if (paramValue instanceof LocalDateTime) {
-            return "'" + ((LocalDateTime) paramValue).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "'";
         }
         return paramValue.toString();
     }
